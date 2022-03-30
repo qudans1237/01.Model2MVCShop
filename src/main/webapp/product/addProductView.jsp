@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
     pageEncoding="EUC-KR"%>
+<% System.out.println("<<<<< addProductView.jsp ½ÃÀÛ >>>>>"); %>
 <!DOCTYPE html>
 <html>
 <head>

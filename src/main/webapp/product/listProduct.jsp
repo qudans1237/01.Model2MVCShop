@@ -3,7 +3,7 @@
 <%@ page import="java.util.*"  %>
 <%@ page import="com.model2.mvc.service.product.vo.*" %>
 <%@ page import="com.model2.mvc.common.*" %>
-
+<% System.out.println("<<<<< listProduct.jsp 시작 >>>>>"); %>
 <%
 	request.setCharacterEncoding("UTF-8"); //받아올 데이터의 인코딩
 	HashMap<String,Object> map=(HashMap<String,Object>)request.getAttribute("map");

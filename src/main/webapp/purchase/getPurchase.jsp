@@ -3,11 +3,13 @@
 <!DOCTYPE html>
 <%@ page import="com.model2.mvc.service.purchase.vo.*" %>
 <%@ page import="com.model2.mvc.service.user.vo.*" %>
-
+<% System.out.println("<<<<< getPurchase.jsp 시작 >>>>>"); %>
 
 <%
 	PurchaseVO vo=(PurchaseVO)request.getAttribute("purch");
-	UserVO uvo=(UserVO)session.getAttribute("user");
+	UserVO userVO=(UserVO)session.getAttribute("user");
+	System.out.println("받은 PurchaseVO :"+vo);
+	System.out.println("받은 UserVO :"+userVO);
 %>
 
 
@@ -74,3 +76,4 @@
 
 </body>
 </html>
+<% System.out.println("<<<<< getPurchase.jsp 종료 >>>>>"); %>

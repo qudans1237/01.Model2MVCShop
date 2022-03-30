@@ -1,10 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
     pageEncoding="EUC-KR"%>
 <%@ page import="com.model2.mvc.service.purchase.vo.*" %>
-
+<% System.out.println("<<<<< getPurchaseView.jsp 시작 >>>>>"); %>
 <%
  PurchaseVO vo = (PurchaseVO)request.getAttribute("vo");
-System.out.println(">>>>>>>>>   "+vo.getTranNo()+"    "+vo.getPaymentOption());
+
+System.out.println("받은 PurchaseVO :"+ vo);
 %>
 
 

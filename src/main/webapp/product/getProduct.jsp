@@ -2,11 +2,12 @@
     pageEncoding="EUC-KR"%>
 <%@ page import="com.model2.mvc.service.product.vo.*" %>
 <%@ page import="com.model2.mvc.service.user.vo.*" %>
-
+<% System.out.println("<<<<< getProduct.jsp 시작 >>>>>"); %>
 <%
 	ProductVO vo=(ProductVO)request.getAttribute("vo");
-	UserVO user = (UserVO)session.getAttribute("user");
-
+	UserVO userVO = (UserVO)session.getAttribute("user");
+	System.out.println("받은 ProductVO :"+vo);
+	System.out.println("받은 UserVO :"+userVO);
 %>
 
 
@@ -132,7 +133,7 @@
 				</td>
 				
 				<td background="/images/ct_btnbg02.gif" class="ct_btn01"	style="padding-top: 3px;">
-				<%if(user.getUserId().contains("user")) {%>
+				<%if(userVO.getUserId().contains("user")) {%>
 					<a href="/addPurchaseView.do?prodNo=<%=vo.getProdNo() %>">구매</a>
 				</td>
 				<td width="14" height="23">

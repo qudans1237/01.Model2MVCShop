@@ -2,11 +2,12 @@
     pageEncoding="EUC-KR"%>
 <%@ page import="com.model2.mvc.service.product.vo.*" %>
 <%@ page import="com.model2.mvc.service.user.vo.*" %>
-
+<% System.out.println("<<<<< addPurchaseView.jsp 시작 >>>>>"); %>
 <%
 	ProductVO vo=(ProductVO)request.getAttribute("vo");
-	UserVO uservo = (UserVO)session.getAttribute("user");
-	
+	UserVO userVO = (UserVO)session.getAttribute("user");
+	System.out.println("받은 productVO :"+vo);
+	System.out.println("받은 userVO :"+userVO);
 %>
 
 
@@ -126,8 +127,8 @@ function fncAddPurchase() {
 			구매자아이디 <img 	src="/images/ct_icon_red.gif" width="3" height="3" align="absmiddle"/>
 		</td>
 		<td bgcolor="D6D6D6" width="1"></td>
-		<td class="ct_write01"><%=uservo.getUserId()%></td>
-		<input type="hidden" name="buyerId"  value="<%=uservo.getUserId() %>" />
+		<td class="ct_write01"><%=userVO.getUserId()%></td>
+		<input type="hidden" name="buyerId"  value="<%=userVO.getUserId() %>" />
 	</tr>
 	<tr>
 		<td height="1" colspan="3" bgcolor="D6D6D6"></td>
