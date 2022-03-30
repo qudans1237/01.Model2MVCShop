@@ -6,12 +6,14 @@
 <%@page import="java.util.HashMap"%>
 <%@page contentType="text/html; charset=EUC-KR"%>
 
+
 <%
 	System.out.println("<<<<< listPurchase.jsp 시작 >>>>>");
 	
 	HashMap<String,Object> map = (HashMap<String,Object>)request.getAttribute("map");
 	System.out.println("받은 map : " + map);
-	
+
+
 	SearchVO searchVO = (SearchVO)request.getAttribute("searchVO");
 	System.out.println("받은 searchVO : " + searchVO);
 	int total = 0;
@@ -103,7 +105,7 @@
 	
 	<tr class="ct_list_pop">
 		<td align="center">
-			<a href="/getPurchase.do?tranNo=<%= vo.getTranNo()%>"><%=no-- %></a>
+			<a href="/getPurchase.do?tranNo=<%=vo.getTranNo()%>"><%=no--%></a>
 		</td>
 		<td></td>
 		<td align="left">
@@ -115,20 +117,16 @@
 		<td align="left"><%=vo.getReceiverPhone() %></td>
 		<td></td>
 		<td align="left">
-		<% if (vo.getTranCode().trim().equals("1")) { %>
+		<% if (vo.getTranCode().trim().equals("001")) { %>
 			현재 구매완료 상태 입니다.
-		<% }else if (vo.getTranCode().trim().equals("2")) { %>
-			현재 배송중 상태 입니다.
-		<% }else if (vo.getTranCode().trim().equals("3")) { %>
+		<% }else if (vo.getTranCode().trim().equals("002")) { %>
+			현재 배송중 상태 입니다. <a href="/updateTranCode.do?tranNo=<%=vo.getTranNo()%>&tranCode=003&page=<%=currentPage%>">물건도착</a>
+		<% }else if (vo.getTranCode().trim().equals("003")) { %>
 			현재 배송완료 상태 입니다.
 		<% } %>
 		</td>
 		<td></td>
-		<td align="left">
-		<% if (vo.getTranCode().trim().equals("2")) { %>
-			<a href="/updateTranCode.do?tranNo=<%=vo.getTranNo()%>&tranCode=3&page=<%=currentPage%>">물건도착</a>
-		<% } %>
-		</td>
+		
 	</tr>
 	<tr>
 		<td colspan="11" bgcolor="D6D7D6" height="1"></td>

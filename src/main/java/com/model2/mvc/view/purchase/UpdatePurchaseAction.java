@@ -1,41 +1,37 @@
 package com.model2.mvc.view.purchase;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * Servlet implementation class UpdatePurchaseAction
- */
-@WebServlet("/UpdatePurchaseAction")
-public class UpdatePurchaseAction extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public UpdatePurchaseAction() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+import com.model2.mvc.framework.Action;
+import com.model2.mvc.service.purchase.PurchaseService;
+import com.model2.mvc.service.purchase.impl.PurchaseServiceImpl;
+import com.model2.mvc.service.purchase.vo.PurchaseVO;
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		response.getWriter().append("Served at: ").append(request.getContextPath());
+public class UpdatePurchaseAction extends Action {//구매정보 수정 요청
+
+	@Override
+	public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		System.out.println("<<<<< UpdatePurchaseAction : execute() 시작 >>>>>");
+		
+		int tranNo = Integer.parseInt(request.getParameter("tranNo"));
+		System.out.println("받은 tranNo : " + tranNo);
+		
+		PurchaseVO purchaseVO = new PurchaseVO();
+		purchaseVO.setTranNo(tranNo);
+		purchaseVO.setPaymentOption(request.getParameter("paymentOption"));
+		purchaseVO.setReceiverName(request.getParameter("receiverName"));
+		purchaseVO.setReceiverPhone(request.getParameter("receiverPhone"));
+		purchaseVO.setDivyAddr(request.getParameter("receiverAddr"));
+		purchaseVO.setDivyRequest(request.getParameter("receiverRequest"));
+		purchaseVO.setDivyDate(request.getParameter("divyDate"));
+		System.out.println("purchaseVO 셋팅완료 : " + purchaseVO);
+		
+		PurchaseService purchaseService = new PurchaseServiceImpl();
+		purchaseService.updatePurcahse(purchaseVO);
+			
+		System.out.println("<<<<< UpdatePurchaseAction : execute() 종료 >>>>>");
+		
+		return "redirect:/getPurchase.do?tranNo="+tranNo;
 	}
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
-	}
-
 }

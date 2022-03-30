@@ -1,183 +1,188 @@
 package com.model2.mvc.service.product.dao;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.model2.mvc.common.SearchVO;
 import com.model2.mvc.common.util.DBUtil;
 import com.model2.mvc.service.product.vo.ProductVO;
-import com.model2.mvc.service.purchase.PurchaseService;
-import com.model2.mvc.service.purchase.impl.PurchaseServiceImpl;
 
 public class ProductDAO {
-	//Constructor
+
 	public ProductDAO() {
+		// TODO Auto-generated constructor stub
 	}
-	
-	//Method
-	//상품등록을 위한 DBMS를 수행
-	public void insertProduct(ProductVO productVO) throws SQLException {
-		System.out.println("<<<<< ProductDAO : insertProduct() 시작 >>>>>");
-		System.out.println("받은 productVO : " + productVO);
+public void insertProduct(ProductVO productVO ) throws Exception {
 		
 		Connection con = DBUtil.getConnection();
+		System.out.println(productVO);
+		String sql = "insert into PRODUCT(prod_no ,prod_name,prod_detail,manufacture_day,price,image_file,reg_date) values (seq_product_prod_no.nextval,?,?,?,?,?,sysdate)";
+		//String sql = "insert into PRODUCT VALUES (SEQ_PRODUCT_PROD_NO.NEXTVAL,?";
+		//seq_product_prod_no.nextval로 넣을때 마다 번호를 매겨서 입력
+		//sysdate는 sql문으로 현재날짜를 입력할때 사용
+		PreparedStatement stmt = con.prepareStatement(sql);
+		stmt.setString(1, productVO.getProdName());
+		stmt.setString(2, productVO.getProdDetail());
+		stmt.setString(3, productVO.getManuDate());
+		stmt.setInt(4, productVO.getPrice());
+		stmt.setString(5, productVO.getFileName());
+//		stmt.setDate(6, productVO.getRegDate());
+		stmt.executeUpdate();
 		
-		String sql = "INSERT INTO product VALUES (seq_product_prod_no.nextval,?,?,?,?,?,sysdate)";
-		
-		PreparedStatement pStmt = con.prepareStatement(sql);
-		pStmt.setString(1, productVO.getProdName());
-		pStmt.setString(2, productVO.getProdDetail());
-		pStmt.setString(3, productVO.getManuDate());
-		pStmt.setInt(4, productVO.getPrice());
-		pStmt.setString(5, productVO.getFileName());
-		pStmt.executeUpdate();
-		System.out.println("insert 완료 : " + sql);
-		
-		pStmt.close();
-		con.close();	
-		System.out.println("<<<<< ProductDAO : insertProduct() 종료 >>>>>");
-	}
-	
-	
-	//상품정보 조회를 위한 DBMS를 수행
-	public ProductVO findProduct(int prodNo) throws Exception {
-		System.out.println("<<<<< ProductDAO : findProduct() 시작 >>>>>");
-		System.out.println("받은 prodNo : " + prodNo);
-		
-		Connection con = DBUtil.getConnection();
-
-		String sql = "SELECT * FROM product WHERE prod_no=?";
-		
-		PreparedStatement pStmt = con.prepareStatement(sql);
-		pStmt.setInt(1, prodNo);
-		ResultSet rs = pStmt.executeQuery();
-		System.out.println("sql 전송완료 : " + sql);
-
-		ProductVO productVO = new ProductVO();
-		while (rs.next()) {
-			productVO.setProdNo(rs.getInt("prod_no"));
-			productVO.setProdName(rs.getString("prod_name"));
-			productVO.setProdDetail(rs.getString("prod_detail"));
-			productVO.setManuDate(rs.getString("manufacture_day"));
-			productVO.setPrice(rs.getInt("price"));
-			productVO.setFileName(rs.getString("image_file"));
-			productVO.setRegDate(rs.getDate("reg_date"));
-		}
-		System.out.println("productVO 셋팅완료 : " + productVO);
-		
-		rs.close();
-		pStmt.close();
 		con.close();
-		System.out.println("<<<<< ProductDAO : findProduct() 종료 >>>>>");
+	}
+
+	public ProductVO findProduct(int prodNo) throws Exception {
+		
+		Connection con = DBUtil.getConnection();
+
+		String sql = "select * from Product where prod_no=?";
+		
+		PreparedStatement stmt = con.prepareStatement(sql);
+		stmt.setInt(1, prodNo);
+
+		ResultSet rs = stmt.executeQuery();
+
+		ProductVO productVO = null;
+		while (rs.next()) {
+			productVO = new ProductVO();
+			productVO.setProdNo(rs.getInt("PROD_NO"));
+			productVO.setProdName(rs.getString("PROD_NAME"));
+			productVO.setManuDate(rs.getString("MANUFACTURE_DAY"));
+			productVO.setPrice(rs.getInt("PRICE"));
+			productVO.setFileName(rs.getString("IMAGE_FILE"));
+			productVO.setProdDetail(rs.getString("PROD_DETAIL"));
+			productVO.setRegDate(rs.getDate("REG_DATE"));
+		}
+		
+		con.close();
+
 		return productVO;
 	}
-	
-	
-	//상품목록 조회를 위한 DBMS를 수행
+
 	public HashMap<String,Object> getProductList(SearchVO searchVO) throws Exception {
-		System.out.println("<<<<< ProductDAO : getProductList() 시작 >>>>>");
-		System.out.println("받은 searchVO : " + searchVO);
 		
 		Connection con = DBUtil.getConnection();
+
+		System.out.println("ProductDAO: searchCondition: "+ searchVO.getSearchCondition()+"  searchKeyword: "+searchVO.getSearchKeyword());
+		String sqlcount = "	select count(*) "
+				+ " from (select vr.* ,TRAN_STATUS_CODE d "
+				+ "		from product vr,transaction t "
+				+ "		where vr.prod_no = t.prod_no(+) "
+				+ "		order by vr.prod_no) v";
+		PreparedStatement stmtcount = con.prepareStatement(sqlcount);
+		ResultSet rscount = stmtcount.executeQuery();
+		rscount.next();
+		int total =rscount.getInt("count(*)");
 		
-		String sql = "SELECT * FROM product ";
+		System.out.println(total);
+//		String sql = "select * from PRODUCT ";
 		
-		//SearchCondition에 값이 있을 경우
+		
+		
+		String sql = "select v.* FROM (select rownum rnum, vr.*,TRAN_STATUS_CODE from PRODUCT vr,transaction t where ";
 		if (searchVO.getSearchCondition() != null) {
+			System.out.println("ProductDAO: searchCondition Not Null"+searchVO.getSearchCondition());
+			//검색조건이 들어오면
 			if (searchVO.getSearchCondition().equals("0")) {
-				sql += " WHERE prod_no LIKE '%" + searchVO.getSearchKeyword() + "%'";
+				//검색조건이 0번째의 검색조건에 해당하는 상품번호 이면
+				sql += " PROD_NO like'%" + searchVO.getSearchKeyword()
+						+ "%' and ";
 			} else if (searchVO.getSearchCondition().equals("1")) {
-				sql += " WHERE prod_name LIKE '%" + searchVO.getSearchKeyword() + "%'";
+				//검색조건이 1번째의 검색조건에 해당하는 상품이름 이면
+				sql += " PROD_NAME like '%" + searchVO.getSearchKeyword()
+						+ "%' and ";
 			} else if (searchVO.getSearchCondition().equals("2")) {
-				sql += " WHERE price LIKE '%" + searchVO.getSearchKeyword() + "%'";
+				//검색조건이 2번째의 검색조건에 해당하는 상품가격 이면
+				sql += " PRICE like '%" + searchVO.getSearchKeyword()
+						+ "%' and ";
 			}
-		}
-		sql += " ORDER BY prod_no";
+		}else
+			System.out.println("ProductDAO: searchCondition Null");
 		
-		PreparedStatement pStmt = con.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE,
-														    ResultSet.CONCUR_UPDATABLE);
-		ResultSet rs = pStmt.executeQuery();
-		System.out.println("sql 전송완료 : " + sql);
+		sql += " vr.prod_no = t.prod_no(+)";
+		sql += " order by vr.PROD_NO) v";
+		sql += " where rnum BETWEEN "+(searchVO.getPage()*searchVO.getPageUnit()-2)+" and "+(searchVO.getPage()*searchVO.getPageUnit());
+		System.out.println("ProductDAO: "+ sql);
+		PreparedStatement stmt = 
+			con.prepareStatement(	sql,
+														ResultSet.TYPE_SCROLL_INSENSITIVE,  //스크롤에 둔감하다?
+														// scroll에 따라서 이전 값도 나오고 다음값도 나오게
+														ResultSet.CONCUR_UPDATABLE);//동의한다. 업데이트 가능?
+														//데이터 변경이 가능하도록
+		ResultSet rs = stmt.executeQuery();
+
+		rs.last();
+		//마지막 데이터를 가게 한다
+		//int total = rs.getRow();
 		
-		rs.last(); //boolean last() : 마지막 행으로 커서 이동
-		int total = rs.getRow(); //int getRow() : 현재 행번호 검색 (마지막 행번호 = 전체 행의 수)
-		System.out.println("전체 로우 수(total) : " + total);
+		System.out.println("로우의 수:" + total);	// 40 
+		//sql의 로우의 수
 
 		HashMap<String,Object> map = new HashMap<String,Object>();
 		map.put("count", new Integer(total));
-		System.out.println("map에 count 추가 : " + map);
 
-		//boolean absolute(int row) : 지정된 행번호로 커서 이동
-		rs.absolute(searchVO.getPage() * searchVO.getPageUnit() - searchVO.getPageUnit()+1);
+//		rs.absolute(searchVO.getPage() * searchVO.getPageUnit() - searchVO.getPageUnit()+1);
+		rs.absolute(1);
+		//구체적으로 몇번째 컬럼으로 커서를 옮기겠다
+		//각페이지의 순서를 알려준다 
+		//absolute 뒤에 있는 값만큼 이동하겠다. 돌려서 확인
+		System.out.println("searchVO.getPage():" + searchVO.getPage());		// 1
+		System.out.println("searchVO.getPageUnit():" + searchVO.getPageUnit());	// 3
+		System.out.println("start page:"+(searchVO.getPage()*searchVO.getPageUnit()-2));
+		System.out.println("end page:"+(searchVO.getPage()*searchVO.getPageUnit()));
 		
+		//vo 한 속성의 값
+		//list 한 테이블 
 		ArrayList<ProductVO> list = new ArrayList<ProductVO>();
-		
-		PurchaseService service = new PurchaseServiceImpl();
 		if (total > 0) {
-			for (int i=0; i<searchVO.getPageUnit(); i++) {
-				ProductVO productVO = new ProductVO();
-				productVO.setProdNo(rs.getInt("prod_no"));
-				productVO.setProdName(rs.getString("prod_name"));
-				productVO.setProdDetail(rs.getString("prod_detail"));
-				productVO.setManuDate(rs.getString("manufacture_day"));
-				productVO.setPrice(rs.getInt("price"));
-				productVO.setFileName(rs.getString("image_file"));
-				productVO.setRegDate(rs.getDate("reg_date"));
-				
-				if(service.getPurchase2(productVO.getProdNo()) != null) {
-					productVO.setProTranCode("재고없음"); 
-				}else {
-					productVO.setProTranCode("판매중");	
-				}
-				
-				list.add(productVO);
-				if (!rs.next()) {
+			System.out.println(rs.getRow());
+			for (int i = 0; i < rs.getRow(); i++) {
+				System.out.println(i);
+				ProductVO vo = new ProductVO();
+				vo.setProdNo(rs.getInt("PROD_NO"));
+				vo.setProdName(rs.getString("PROD_NAME"));
+				vo.setManuDate(rs.getString("MANUFACTURE_DAY"));
+				vo.setPrice(rs.getInt("PRICE"));
+				vo.setFileName(rs.getString("IMAGE_FILE"));
+				vo.setProdDetail(rs.getString("PROD_DETAIL"));
+				vo.setRegDate(rs.getDate("REG_DATE"));
+				vo.setProTranCode(rs.getString("TRAN_STATUS_CODE"));
+
+				list.add(vo);
+				if (!rs.next())
 					break;
-				}
-				System.out.println("productVO 셋팅완료 : " + productVO);	
 			}
 		}
+
+		System.out.println("list.size() : "+ list.size());
 		map.put("list", list);
-		System.out.println("map에 list 추가 : " + map);
-		System.out.println("list.size() : " + list.size()); 
-		System.out.println("map.size() : " + map.size()); 
-		
-		rs.close();
-		pStmt.close();
+		System.out.println("map().size() : "+ map.size());
+
 		con.close();
-		System.out.println("<<<<< ProductDAO : getProductList() 종료 >>>>>");
+			
 		return map;
 	}
-	
-	
-	//상품정보 수정을 위한 DBMS를 수행
-	public void updateProduct(ProductVO productVO) throws Exception {
-		System.out.println("<<<<< ProductDAO : updateProduct() 시작 >>>>>");
-		System.out.println("받은 productVO : " + productVO);
+
+	public void updateProduct(ProductVO ProductVO) throws Exception {
 		
 		Connection con = DBUtil.getConnection();
 
-		String sql = "UPDATE product "
-				    + "SET prod_name=?, prod_detail=?, manufacture_day=?, "
-				    + "price=?, image_file=? WHERE prod_no=?";
+		String sql = "update PRODUCT set PROD_NAME=?,MANUFACTURE_DAY=?,PRICE=?,IMAGE_FILE=?,PROD_DETAIL=? where PROD_NO=?";
 		
-		PreparedStatement pStmt = con.prepareStatement(sql);
-		pStmt.setString(1, productVO.getProdName());
-		pStmt.setString(2, productVO.getProdDetail());
-		pStmt.setString(3, productVO.getManuDate());
-		pStmt.setInt(4, productVO.getPrice());
-		pStmt.setString(5, productVO.getFileName());
-		pStmt.setInt(6, productVO.getProdNo());
-		pStmt.executeUpdate();
-		System.out.println("update 완료 : " + sql);
+		PreparedStatement stmt = con.prepareStatement(sql);
+		stmt.setString(1, ProductVO.getProdName());
+		stmt.setString(2, ProductVO.getManuDate());
+		stmt.setInt(3, ProductVO.getPrice());
+		stmt.setString(4, ProductVO.getFileName());
+		stmt.setString(5, ProductVO.getProdDetail());
+		stmt.setInt(6, ProductVO.getProdNo());
 		
-		pStmt.close();
+		stmt.executeUpdate();
+		
 		con.close();
-		System.out.println("<<<<< ProductDAO : updateProduct() 종료 >>>>>");
 	}
 
-}//end of class
+}

@@ -1,48 +1,47 @@
 package com.model2.mvc.view.product;
 
+import java.util.HashMap;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.model2.mvc.framework.Action;
 import com.model2.mvc.service.product.ProductService;
 import com.model2.mvc.service.product.impl.ProductServiceImpl;
 import com.model2.mvc.service.product.vo.ProductVO;
-import com.model2.mvc.service.user.UserService;
-import com.model2.mvc.service.user.impl.UserServiceImpl;
-import com.model2.mvc.service.user.vo.UserVO;
 
-public class GetProductAction extends Action {//상품상세보기 요청
+public class GetProductAction extends Action {
 
-	//1. 판매상품관리 or 상품검색 메뉴 클릭
-	//2. 판매상품관리의 상품명 ==> http://192.168.0.96:8080/getProduct.do?prodNo=prodNo&menu=manage 이동
-	//3. 상품검색의 상품명    ==> http://192.168.0.96:8080/getProduct.do?prodNo=prodNo&menu=search 이동
-	//4. GetProductAction.java의 execute() 실행
-	//5. menu=manage 일 경우 ==> UpdateProductViewAction.java 이동
-	//6. menu=search 일 경우 ==> getProduct.jsp 이동
-	
+
 	@Override
 	public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		System.out.println("<<<<< GetProductAction : execute() 시작 >>>>>");
+		// TODO Auto-generated method stub
+		int prodNo=Integer.parseInt(request.getParameter("prodNo"));
 		
-		int prodNo = Integer.parseInt(request.getParameter("prodNo"));
-		System.out.println("받은 prodNo : " + prodNo);
+		ProductService service=new ProductServiceImpl();
+		ProductVO vo=service.getProduct(prodNo);
+		System.out.println("getprodNo>>>>>:"+prodNo);
+		System.out.println("getprodNo¿¡ vo>>>>>:"+vo);
+		request.setAttribute("vo", vo);
 		
-		String menu = request.getParameter("menu");
-		System.out.println("받은 menu : " + menu);
 		
-		//menu의 값이 manage일 경우
-		if(menu != null && menu.equals("manage")) {
-			return "forward:/updateProductView.do?prodNo="+prodNo+"&menu="+menu;
-		}
+		HashMap<String,Object> map = new HashMap ();
+		map.put("prodNo", request.getParameter("prodNo"));
+		map.put("prodName", request.getParameter("prodName"));
+		map.put("manuDate", request.getParameter("manuDate"));
+		map.put("price", request.getParameter("price"));
+		map.put("prodDetail", request.getParameter("prodDetail"));
+		map.put("regDate", request.getParameter("regDate"));
 		
-		ProductService service = new ProductServiceImpl();
-		ProductVO productVO = service.getProduct(prodNo);
-		System.out.println("productVO 셋팅완료 : " + productVO);
+		HttpSession session=request.getSession();
+		map.get("prodName");
+		System.out.println("GetProduct  session >>"+map);
+		session.setAttribute("productVO", map);
 		
-		request.setAttribute("productVO", productVO);
 		
-		System.out.println("<<<<< GetProductAction : execute() 종료 >>>>>");
+		
+
 		return "forward:/product/getProduct.jsp";
-		
 	}
 }
